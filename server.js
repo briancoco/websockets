@@ -10,25 +10,31 @@ const io = new Server(3000, {
 //and reference this map to prepend user names to messages
 
 const names = {};
+const rooms = {};
 
 io.on("connection", (socket) => {
   
 
-  socket.on("new-user", (name) => {
-    names[socket.id] = name;
-    socket.broadcast.emit('user-connected', name);
+  socket.on("new-user", (data) => {
+    names[socket.id] = data.name;
+    rooms[socket.id] = data.room;
+    socket.join(data.room);
+    socket.to(data.room).emit('user-connected', data.name);
   })
 
   socket.on("send-chat-message", (message) => {
-    socket.broadcast.emit("chat-message", {
+    const room = rooms[socket.id];
+    socket.to(room).emit("chat-message", {
       name: names[socket.id],
       message
     });
   })
 
   socket.on("disconnect", () => {
-    socket.broadcast.emit('user-disconnected', names[socket.id]);
+    const room = rooms[socket.id];
+    socket.to(room).emit('user-disconnected', names[socket.id]);
     delete names[socket.id];
+    delete rooms[socket.id];
   })
 
 });

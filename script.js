@@ -8,9 +8,9 @@ socket.on('connect', () => {
     //on connection we want to prompt the user for their name
     //then emit an event to the ws server, so we can
     //add this name to our hashmap
-
     const name = prompt('Enter your name: ');
-    socket.emit('new-user', name);
+    const room = prompt('Enter room code: ');
+    socket.emit('new-user', {name, room});
 
 });
 
